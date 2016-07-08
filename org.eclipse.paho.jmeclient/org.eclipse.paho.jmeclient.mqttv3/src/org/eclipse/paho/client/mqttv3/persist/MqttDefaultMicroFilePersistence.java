@@ -35,7 +35,7 @@ public class MqttDefaultMicroFilePersistence implements MqttClientPersistence {
 	private FileConnection dataDir = null;
 	private FileConnection clientDir = null;
 	private DataOutputStream out;
-	private static final char[] validChars = new char[]{'£','$','0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','_','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'}; 
+	private static final char[] validChars = new char[]{'\u00A3','$','0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','_','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
 	private final static String FILESEPERATOR = "/";
 	private static final String MESSAGE_FILE_EXTENSION = ".msg";
 	private static final String MESSAGE_BACKUP_FILE_EXTENSION = ".bup";

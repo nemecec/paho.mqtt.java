@@ -163,6 +163,8 @@ public class MqttException extends Exception {
 	 */
 	public static final short REASON_CODE_DISCONNECTED_BUFFER_FULL	= 32203;
 
+	public static final short REASON_CODE_CATALOG_NOT_FOUND	= 32204;
+
 	private int reasonCode;
 	private Throwable cause;
 	

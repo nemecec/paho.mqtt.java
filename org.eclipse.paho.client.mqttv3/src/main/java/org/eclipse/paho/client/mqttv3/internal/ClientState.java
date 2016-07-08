@@ -23,7 +23,6 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.io.EOFException;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.Vector;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -209,8 +208,8 @@ public class ClientState {
 
 		persistence.clear();
 		inUseMsgIds.clear();
-		pendingMessages.clear();
-		pendingFlows.clear();
+		pendingMessages.removeAllElements();
+		pendingFlows.removeAllElements();
 		outboundQoS2.clear();
 		outboundQoS1.clear();
 		outboundQoS0.clear();
@@ -768,7 +767,8 @@ public class ClientState {
 				// Now process any queued flows or messages
 				if (!pendingFlows.isEmpty()) {
 					// Process the first "flow" in the queue
-					result = (MqttWireMessage)pendingFlows.remove(0);
+					result = (MqttWireMessage)pendingFlows.elementAt(0);
+					pendingFlows.removeElementAt(0);
 					if (result instanceof MqttPubRel) {
 						inFlightPubRels++;
 
@@ -908,7 +908,7 @@ public class ClientState {
 		int tokC = tokenStore.count();
 		if (quiescing && tokC == 0 && pendingFlows.size() == 0 && callback.isQuiesced()) {
 			//@TRACE 626=quiescing={0} actualInFlight={1} pendingFlows={2} inFlightPubRels={3} callbackQuiesce={4} tokens={5}
-			log.fine(CLASS_NAME,methodName,"626",new Object[]{new Boolean(quiescing), new Integer(actualInFlight), new Integer(pendingFlows.size()), new Integer(inFlightPubRels), Boolean.valueOf(callback.isQuiesced()), new Integer(tokC)});
+			log.fine(CLASS_NAME,methodName,"626",new Object[]{new Boolean(quiescing), new Integer(actualInFlight), new Integer(pendingFlows.size()), new Integer(inFlightPubRels), new Boolean(callback.isQuiesced()), new Integer(tokC)});
 			synchronized (quiesceLock) {
 				quiesceLock.notifyAll();
 			}
@@ -1209,8 +1209,8 @@ public class ClientState {
 				clearState();
 			}
 
-			pendingMessages.clear();
-			pendingFlows.clear();
+			pendingMessages.removeAllElements();
+			pendingFlows.removeAllElements();
 			synchronized (pingOutstandingLock) {
 				// Reset pingOutstanding to allow reconnects to assume no previous ping.
 			    pingOutstanding = 0;
@@ -1300,8 +1300,8 @@ public class ClientState {
 			// Quiesce time up or inflight messages delivered.  Ensure pending delivery
 			// vectors are cleared ready for disconnect to be sent as the final flow.
 			synchronized (queueLock) {
-				pendingMessages.clear();				
-				pendingFlows.clear();
+				pendingMessages.removeAllElements();
+				pendingFlows.removeAllElements();
 				quiescing = false;
 				actualInFlight = 0;
 			}
@@ -1354,8 +1354,8 @@ public class ClientState {
 	 */
 	protected void close() {
 		inUseMsgIds.clear();
-		pendingMessages.clear();
-		pendingFlows.clear();
+		pendingMessages.removeAllElements();
+		pendingFlows.removeAllElements();
 		outboundQoS2.clear();
 		outboundQoS1.clear();
 		outboundQoS0.clear();
@@ -1375,8 +1375,8 @@ public class ClientState {
 		pingCommand = null;	
 	}
 	
-	public Properties getDebug() {
-		Properties props = new Properties();
+	public Hashtable getDebug() {
+		Hashtable props = new Hashtable();
 		props.put("In use msgids", inUseMsgIds);
 		props.put("pendingMessages", pendingMessages);
 		props.put("pendingFlows", pendingFlows);
@@ -1384,7 +1384,7 @@ public class ClientState {
 		props.put("nextMsgID", new Integer(nextMsgId));
 		props.put("actualInFlight", new Integer(actualInFlight));
 		props.put("inFlightPubRels", new Integer(inFlightPubRels));
-		props.put("quiescing", Boolean.valueOf(quiescing));
+		props.put("quiescing", new Boolean(quiescing));
 		props.put("pingoutstanding", new Integer(pingOutstanding));
 		props.put("lastOutboundActivity", new Long(lastOutboundActivity));
 		props.put("lastInboundActivity", new Long(lastInboundActivity));

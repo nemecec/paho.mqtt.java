@@ -21,6 +21,9 @@ import java.util.Properties;
 
 import javax.net.SocketFactory;
 
+import org.eclipse.paho.client.mqttv3.internal.IMqttNetworkFactory;
+import org.eclipse.paho.client.mqttv3.internal.MqttNetworkFactory;
+import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.client.mqttv3.util.Debug;
 
 import java.net.URI;
@@ -53,11 +56,11 @@ public class MqttConnectOptions {
 	public static final int MQTT_VERSION_3_1 = 3;
 	public static final int MQTT_VERSION_3_1_1 = 4;
 
-	protected static final int URI_TYPE_TCP = 0;
-	protected static final int URI_TYPE_SSL = 1;
-	protected static final int URI_TYPE_LOCAL = 2;
-	protected static final int URI_TYPE_WS = 3;
-	protected static final int URI_TYPE_WSS = 4;
+	public static final int URI_TYPE_TCP = 0;
+	public static final int URI_TYPE_SSL = 1;
+	public static final int URI_TYPE_LOCAL = 2;
+	public static final int URI_TYPE_WS = 3;
+	public static final int URI_TYPE_WSS = 4;
 
 	private int keepAliveInterval = KEEP_ALIVE_INTERVAL_DEFAULT;
 	private int maxInflight = MAX_INFLIGHT_DEFAULT;
@@ -72,6 +75,8 @@ public class MqttConnectOptions {
 	private String[] serverURIs = null;
 	private int MqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
+	private IMqttNetworkFactory networkFactory = new MqttNetworkFactory();
+	static final MqttClientPersistence DEFAULT_FILE_PERSISTENCE = new MqttDefaultFilePersistence();
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
@@ -483,7 +488,7 @@ public class MqttConnectOptions {
 	 * @return the URI type
 	 */
 
-	protected static int validateURI(String srvURI) {
+	public static int validateURI(String srvURI) {
 		try {
 			URI vURI = new URI(srvURI);
 			if (vURI.getScheme().equals("ws")){
@@ -512,7 +517,11 @@ public class MqttConnectOptions {
 			throw new IllegalArgumentException(srvURI);
 		}
 	}
-	
+
+	public IMqttNetworkFactory getNetworkFactory() {
+		return networkFactory;
+	}
+
 	/**
 	 * Sets the MQTT version.
 	 * The default action is to connect with version 3.1.1, 

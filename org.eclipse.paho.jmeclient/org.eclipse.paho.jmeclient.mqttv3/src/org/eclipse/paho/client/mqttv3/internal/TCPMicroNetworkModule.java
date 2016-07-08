@@ -28,7 +28,9 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * A network module for connecting over TCP from Java ME (CLDC profile).
  */
 public class TCPMicroNetworkModule implements NetworkModule {
-	private String uri;
+	private final String host;
+	private final int port;
+	private final String uri;
 	private SocketConnection connection;
 	private InputStream in;
 	private OutputStream out;
@@ -44,6 +46,8 @@ public class TCPMicroNetworkModule implements NetworkModule {
 	 * @param secure whether or not to use SSL.
 	 */
 	public TCPMicroNetworkModule(String host, int port) {
+		this.host = host;
+		this.port = port;
 		this.uri = "socket://" + host + ":" + port;
 	}
 	
@@ -82,4 +86,9 @@ public class TCPMicroNetworkModule implements NetworkModule {
 		out.close();
 		connection.close();
 	}
+
+	public String getServerURI() {
+		return "tcp://" + host + ":" + port;
+	}
+
 }

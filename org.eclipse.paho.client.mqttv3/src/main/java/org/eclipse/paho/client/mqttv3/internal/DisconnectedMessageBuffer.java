@@ -15,8 +15,6 @@
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
-import java.util.ArrayList;
-
 import org.eclipse.paho.client.mqttv3.BufferedMessage;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -25,18 +23,20 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
+import java.util.Vector;
+
 public class DisconnectedMessageBuffer implements Runnable {
 	
 	private static final String CLASS_NAME = "DisconnectedMessageBuffer";
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 	private DisconnectedBufferOptions bufferOpts;
-	private ArrayList buffer;
+	private Vector buffer;
 	private Object	bufLock = new Object();  	// Used to synchronise the buffer
 	private IDisconnectedBufferCallback callback;
 	
 	public DisconnectedMessageBuffer(DisconnectedBufferOptions options){
 		this.bufferOpts = options;
-		buffer = new ArrayList();
+		buffer = new Vector();
 	}
 	
 	/**
@@ -52,10 +52,10 @@ public class DisconnectedMessageBuffer implements Runnable {
 		BufferedMessage bufferedMessage = new BufferedMessage(message, token);
 		synchronized (bufLock) {
 			if(buffer.size() < bufferOpts.getBufferSize()){
-				buffer.add(bufferedMessage);
+				buffer.addElement(bufferedMessage);
 			} else if(bufferOpts.isDeleteOldestMessages() == true){
-				buffer.remove(0);
-				buffer.add(bufferedMessage);
+				buffer.removeElementAt(0);
+				buffer.addElement(bufferedMessage);
 			}else {
 				throw new MqttException(MqttException.REASON_CODE_DISCONNECTED_BUFFER_FULL);
 			}
@@ -70,7 +70,7 @@ public class DisconnectedMessageBuffer implements Runnable {
 	 */
 	public BufferedMessage getMessage(int messageIndex){
 		synchronized (bufLock) {
-			return((BufferedMessage) buffer.get(messageIndex));
+			return((BufferedMessage) buffer.elementAt(messageIndex));
 		}
 	}
 	
@@ -82,7 +82,7 @@ public class DisconnectedMessageBuffer implements Runnable {
 	 */
 	public void deleteMessage(int messageIndex){
 		synchronized (bufLock) {
-			buffer.remove(messageIndex);
+			buffer.removeElementAt(messageIndex);
 		}
 	}
 	

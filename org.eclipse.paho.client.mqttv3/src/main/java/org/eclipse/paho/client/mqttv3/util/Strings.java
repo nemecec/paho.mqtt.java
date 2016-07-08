@@ -26,11 +26,10 @@ public final class Strings {
 	 * Checks if the CharSequence equals any character in the given set of characters.
 	 * 
 	 * @param cs the CharSequence to check
-	 * @param first the first CharSequence
-	 * @param rest the rest CharSequence
+	 * @param strs the CharSequence to check against
 	 * @return true if equals any
 	 */
-	public static boolean equalsAny(CharSequence cs, CharSequence[] strs) {
+	public static boolean equalsAny(String cs, String[] strs) {
 		boolean eq = false;
 		if (cs == null) {
 			eq = strs == null;
@@ -52,7 +51,7 @@ public final class Strings {
 	 * @param searchChars the chars to search for, may be null
 	 * @return the {@code true} if any of the chars are found, {@code false} if no match or null input
 	 */
-	public static boolean containsAny(CharSequence cs, CharSequence searchChars) {
+	public static boolean containsAny(String cs, String searchChars) {
 		if (searchChars == null) {
 			return false;
 		}
@@ -66,7 +65,7 @@ public final class Strings {
 	 * @param searchChars the chars to search for, may be null
 	 * @return the {@code true} if any of the chars are found, {@code false} if no match or null input
 	 */
-	public static boolean containsAny(CharSequence cs, char[] searchChars) {
+	public static boolean containsAny(String cs, char[] searchChars) {
 		if (isEmpty(cs) || isEmpty(searchChars)) {
 			return false;
 		}
@@ -78,7 +77,7 @@ public final class Strings {
 			char ch = cs.charAt(i);
 			for (int j = 0; j < searchLength; j++) {
 				if (searchChars[j] == ch) {
-					if (Character.isHighSurrogate(ch)) {
+					if (isHighSurrogate(ch)) {
 						if (j == searchLast) {
 							// missing low surrogate, fine, like String.indexOf(String)
 							return true;
@@ -97,13 +96,17 @@ public final class Strings {
 		return false;
 	}
 
+	private static boolean isHighSurrogate(char ch) {
+		return ('\uD800' <= ch && '\uDBFF' >= ch);
+	}
+
 	/**
 	 * Checks if a CharSequence is empty ("") or null.
 	 * 
 	 * @param cs the CharSequence to check, may be null
 	 * @return {@code true} if the CharSequence is empty or null
 	 */
-	public static boolean isEmpty(CharSequence cs) {
+	public static boolean isEmpty(String cs) {
 		return cs == null || cs.length() == 0;
 	}
 
@@ -120,7 +123,7 @@ public final class Strings {
 	 * @param cs the {@code CharSequence} to be processed
 	 * @return the resulting char array
 	 */
-	private static char[] toCharArray(CharSequence cs) {
+	private static char[] toCharArray(String cs) {
 		if (cs instanceof String) {
 			return ((String) cs).toCharArray();
 		}
@@ -141,7 +144,7 @@ public final class Strings {
 	 * @param sub the substring to count, may be null
 	 * @return the number of occurrences, 0 if either CharSequence is {@code null}
 	 */
-	public static int countMatches(CharSequence str, CharSequence sub) {
+	public static int countMatches(String str, String sub) {
 		if (isEmpty(str) || isEmpty(sub)) {
 			return 0;
 		}
@@ -162,7 +165,7 @@ public final class Strings {
 	 * @param start the start index
 	 * @return the index where the search sequence was found
 	 */
-	private static int indexOf(CharSequence cs, CharSequence searchChar, int start) {
+	private static int indexOf(String cs, String searchChar, int start) {
 		return cs.toString().indexOf(searchChar.toString(), start);
 	}
 

@@ -15,10 +15,10 @@
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.sun.midp.io.BufferedOutputStream;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.internal.ClientState;
 import org.eclipse.paho.client.mqttv3.logging.Logger;

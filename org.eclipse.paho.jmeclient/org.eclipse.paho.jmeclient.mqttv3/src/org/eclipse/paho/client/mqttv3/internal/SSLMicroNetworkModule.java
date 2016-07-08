@@ -30,7 +30,9 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * A network module for connecting over SSL from Java ME (CLDC profile).
  */
 public class SSLMicroNetworkModule implements NetworkModule {
-	private String uri;
+	private final String host;
+	private final int port;
+	private final String uri;
 	private SecureConnection connection;
 	private InputStream in;
 	private OutputStream out;
@@ -46,6 +48,8 @@ public class SSLMicroNetworkModule implements NetworkModule {
 	 * @param secure whether or not to use SSL.
 	 */
 	public SSLMicroNetworkModule(String host, int port) {
+		this.host = host;
+		this.port = port;
 		this.uri = "ssl://" + host + ":" + port;
 	}
 	
@@ -86,4 +90,9 @@ public class SSLMicroNetworkModule implements NetworkModule {
 		out.close();
 		connection.close();
 	}
+
+	public String getServerURI() {
+		return "ssl://" + host + ":" + port;
+	}
+
 }
