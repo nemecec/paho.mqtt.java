@@ -101,6 +101,9 @@
 			<fileset dir="${source.folder}/src">
 				<include name="**/*.properties" />
 			</fileset>
+			<fileset dir="${source.folder}/../../org.eclipse.paho.client.mqttv3/src/main/resources" >
+				<include name="**/*" />
+			</fileset>
 		</copy>
 
 		<antcall target="updateManifest">
