@@ -1,4 +1,4 @@
-<project name="org.eclipse.paho.jmeclient.mqttv3" default="full">
+<project name="org.eclipse.paho.jmeclient.mqttv3" default="full" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
 	<description>Builds a redistributable JAR and documentation for the Paho Java ME client.</description>
 
@@ -131,5 +131,13 @@
 
 	<target name="full" depends="clean,compile,package" 
 		description="Clean, build and package." />
+
+	<target name="install" depends="full" description="Install JAR in Maven repo">
+	    <artifact:pom id="pahoPom" file="${source.folder}/../../org.eclipse.paho.client.mqttv3/pom.xml" />
+	      <artifact:install file="${ship.folder}/${paho-jmeclient-v3-jar}">
+              <pom refid="pahoPom"/>
+              <attach file="${ship.folder}/${paho-jmeclient-v3-source-jar}" type="jar" classifier="sources"/>
+        </artifact:install>
+	</target>
 
 </project>
