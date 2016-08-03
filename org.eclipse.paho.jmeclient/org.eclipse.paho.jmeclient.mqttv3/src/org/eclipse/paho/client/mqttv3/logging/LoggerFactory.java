@@ -65,7 +65,8 @@ public class LoggerFactory {
 		try {
 			logger = getLogger(loggerClassName, PropertyResourceBundle.getBundle(messageCatalogName, true), loggerID, null) ;
 		} catch (MqttException e) {
-			throw new IllegalStateException("Error locating the logging class: " + loggerClassName + ", " + loggerID);
+			e.printStackTrace();
+			throw new IllegalStateException("Error locating the logging class: " + loggerClassName + ", " + loggerID + ", " + e);
 		}
 		
 		// If it's still Null create an EmptyLogger
