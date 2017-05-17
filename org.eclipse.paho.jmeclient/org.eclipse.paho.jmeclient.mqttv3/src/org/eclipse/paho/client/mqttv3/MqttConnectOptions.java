@@ -18,6 +18,7 @@ package org.eclipse.paho.client.mqttv3;
 import org.eclipse.paho.client.mqttv3.internal.IMqttNetworkFactory;
 import org.eclipse.paho.client.mqttv3.internal.MqttMicroNetworkFactory;
 import org.eclipse.paho.client.mqttv3.util.Debug;
+import org.eclipse.paho.client.mqttv3.util.GprsConnectOptions;
 
 import java.util.Hashtable;
 
@@ -68,6 +69,7 @@ public class MqttConnectOptions {
 	private boolean automaticReconnect = false;
 	private IMqttNetworkFactory networkFactory = new MqttMicroNetworkFactory();
 	static final MqttClientPersistence DEFAULT_FILE_PERSISTENCE = null;
+	private GprsConnectOptions gprsConnectOptions;
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the 
@@ -487,6 +489,14 @@ public class MqttConnectOptions {
 		this.automaticReconnect = automaticReconnect;
 	}
 
+	public void setGprsConnectOptions(GprsConnectOptions gprsConnectOptions) {
+		this.gprsConnectOptions = gprsConnectOptions;
+	}
+
+	public GprsConnectOptions getGprsConnectOptions() {
+		return gprsConnectOptions;
+	}
+
 	public Hashtable getDebug() {
 		Hashtable hash = new Hashtable();
 		hash.put("MqttVersion", new Integer(getMqttVersion()));
@@ -500,6 +510,9 @@ public class MqttConnectOptions {
 		//} else {
 		//	hash.put("SocketFactory", getSocketFactory());
 		//}
+		if (gprsConnectOptions != null) {
+			hash.put("GprsConnectOptions", gprsConnectOptions.toString());
+		}
 		if (getSSLProperties()==null) {
 			hash.put("SSLProperties", "null");
 		} else {

@@ -24,6 +24,7 @@ import javax.microedition.io.SecureConnection;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+import org.eclipse.paho.client.mqttv3.util.GprsConnectOptions;
 
 
 /**
@@ -47,10 +48,10 @@ public class SSLMicroNetworkModule implements NetworkModule {
 	 * @param port the port to connect to
 	 * @param secure whether or not to use SSL.
 	 */
-	public SSLMicroNetworkModule(String host, int port) {
+	public SSLMicroNetworkModule(String host, int port, GprsConnectOptions options) {
 		this.host = host;
 		this.port = port;
-		this.uri = "ssl://" + host + ":" + port;
+		this.uri = "ssl://" + host + ":" + port + GprsConnectOptions.toUriParameters(options);
 	}
 	
 	/**

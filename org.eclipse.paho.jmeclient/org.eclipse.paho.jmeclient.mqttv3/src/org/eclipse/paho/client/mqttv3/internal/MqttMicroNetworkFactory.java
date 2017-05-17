@@ -54,7 +54,7 @@ public class MqttMicroNetworkFactory extends AbstractMqttNetworkFactory {
 			shortAddress = address.substring(6);
 			host = getHostName(shortAddress);
 			port = getPort(shortAddress, 1883);
-			netModule = new TCPMicroNetworkModule(host, port);
+			netModule = new TCPMicroNetworkModule(host, port, options.getGprsConnectOptions());
 			break;
 		case URI_TYPE_SSL:
 			shortAddress = address.substring(6);
@@ -62,7 +62,7 @@ public class MqttMicroNetworkFactory extends AbstractMqttNetworkFactory {
 			port = getPort(shortAddress, 8883);
 			// SSL configuration for Java ME is much simpler, and we'll use
 			// the platform settings.
-			netModule = new SSLMicroNetworkModule(host, port);
+			netModule = new SSLMicroNetworkModule(host, port, options.getGprsConnectOptions());
 			break;
 		default:
 			// This shouldn't happen, as long as validateURI() has been called.
