@@ -174,7 +174,7 @@ public class MqttException extends Exception {
 	 * @param reasonCode the reason code for the exception.
 	 */
 	public MqttException(int reasonCode) {
-		super();
+		super(MessageCatalog.getMessage(reasonCode));
 		this.reasonCode = reasonCode;
 	}
 	
@@ -184,7 +184,7 @@ public class MqttException extends Exception {
 	 * @param cause the underlying cause of the exception.
 	 */
 	public MqttException(Throwable cause) {
-		super();
+		super(String.valueOf(cause));
 		this.reasonCode = REASON_CODE_CLIENT_EXCEPTION;
 		this.cause = cause;
 	}
@@ -196,7 +196,7 @@ public class MqttException extends Exception {
 	 * @param cause the underlying cause of the exception.
 	 */
 	public MqttException(int reason, Throwable cause) {
-		super();
+		super(MessageCatalog.getMessage(reason) + ": " + cause);
 		this.reasonCode = reason;
 		this.cause = cause;
 	}
