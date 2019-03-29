@@ -3,7 +3,8 @@
 	<description>Builds a redistributable JAR and documentation for the Paho Java ME client.</description>
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
-    
+
+	<property environment="env"/>
 	<property name="property.file" value="build.properties"/>
 	<property file="${property.file}"/>
 	
@@ -52,19 +53,19 @@
 
 		<aether:settings file="${source.folder}/../../.circleci/.m2/settings.xml" />
 
-		<aether:remoterepo id="release.repo" url="${MAVEN_REPO_URL}/maven-releases">
+		<aether:remoterepo id="release.repo" url="${env.MAVEN_REPO_URL}/maven-releases">
 			<releases enabled="true" updates="daily" />
 			<snapshots enabled="false" />
 			<authentication refid="auth" />
 		</aether:remoterepo>
 
-		<aether:remoterepo id="snapshot.repo" url="${MAVEN_REPO_URL}/maven-snapshots">
+		<aether:remoterepo id="snapshot.repo" url="${env.MAVEN_REPO_URL}/maven-snapshots">
 			<releases enabled="false" />
 			<snapshots enabled="true" />
 			<authentication refid="auth" />
 		</aether:remoterepo>
 
-		<aether:authentication id="auth" username="${MAVEN_REPO_USER}" password="${MAVEN_REPO_PASS}" />
+		<aether:authentication id="auth" username="${env.MAVEN_REPO_USER}" password="${env.MAVEN_REPO_PASS}" />
 
 		<aether:pom id="pom" file="${source.folder}/../../org.eclipse.paho.client.mqttv3/pom.xml" />
 
