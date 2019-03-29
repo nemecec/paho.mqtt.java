@@ -32,7 +32,7 @@
 	<target name="init-aether" depends="init">
 		<!-- https://wiki.eclipse.org/Aether/Ant_Tasks -->
 
-		<mkdir dir="${output.folder}/antlib" />
+		<mkdir dir="${source.folder}/antlib" />
 
 		<get src="http://search.maven.org/remotecontent?filepath=org/eclipse/aether/aether-ant-tasks/1.0.0.v20140518/aether-ant-tasks-1.0.0.v20140518-uber.jar"
 				 dest="antlib/aether-ant-tasks-uber.jar" verbose="true" skipexisting="true"/>
