@@ -4,10 +4,33 @@
 	<parent>
 		<groupId>org.eclipse.paho</groupId>
 		<artifactId>java-parent</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.0-1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.paho.micro.client.mqttv3</artifactId>
 	<packaging>jar</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.cinterion</groupId>
+			<artifactId>cldc</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.cinterion</groupId>
+			<artifactId>cwm</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.cinterion</groupId>
+			<artifactId>impng</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.cinterion</groupId>
+			<artifactId>jsr75</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>
 	
 </project>
