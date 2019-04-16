@@ -1,5 +1,5 @@
 # Port of Eclipse Paho Java Client to Cinterion WTK (Java ME)
-[![CircleCI](https://circleci.com/gh/sympower/paho.mqtt.java.svg?style=svg)](https://circleci.com/gh/sympower/paho.mqtt.java)
+[![CircleCI](https://circleci.com/gh/sympower/paho.mqtt.java/tree/master.svg?style=svg)](https://circleci.com/gh/sympower/paho.mqtt.java/tree/master)
 
 The Paho Java Client is an MQTT client library written in Java for developing applications that run on the JVM or other Java compatible platforms such as Android
 
