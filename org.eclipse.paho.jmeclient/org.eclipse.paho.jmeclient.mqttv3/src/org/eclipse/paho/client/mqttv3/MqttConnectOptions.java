@@ -15,9 +15,12 @@
  */
 package org.eclipse.paho.client.mqttv3;
 
-import java.util.Hashtable;
-
+import org.eclipse.paho.client.mqttv3.internal.IMqttNetworkFactory;
+import org.eclipse.paho.client.mqttv3.internal.MqttMicroNetworkFactory;
 import org.eclipse.paho.client.mqttv3.util.Debug;
+import org.eclipse.paho.client.mqttv3.util.GprsConnectOptions;
+
+import java.util.Hashtable;
 
 /**
  * Holds options that control how the client connects to a server.
@@ -32,24 +35,41 @@ public class MqttConnectOptions {
 	 */
 	public static final int CONNECTION_TIMEOUT_DEFAULT = 30;
 	/**
+     * The default max inflight if one is not specified
+     */
+    public static final int MAX_INFLIGHT_DEFAULT = 10;
+	/**
 	 * The default clean session setting if one is not specified
 	 */
 	public static final boolean CLEAN_SESSION_DEFAULT = true;
 	
+	/**
+	 * The default MqttVersion is 3.1.1 first, dropping back to 3.1 if that fails
+	 */
+	public static final int MQTT_VERSION_DEFAULT = 0;
+	public static final int MQTT_VERSION_3_1 = 3;
+	public static final int MQTT_VERSION_3_1_1 = 4;
+
 	protected static final int URI_TYPE_TCP = 0;
 	protected static final int URI_TYPE_SSL = 1;
 	protected static final int URI_TYPE_LOCAL = 2;
   
 	private int keepAliveInterval = KEEP_ALIVE_INTERVAL_DEFAULT;
+	private int maxInflight = MAX_INFLIGHT_DEFAULT;
 	private String willDestination = null;
 	private MqttMessage willMessage = null;
 	private String userName;
 	private char[] password;
 	//private MqttSocketFactory socketFactory; 
-	private Hashtable sslClientProps = null; 
+	private Hashtable sslClientProps = null;
 	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
 	private String[] serverURIs;
+	private int MqttVersion = MQTT_VERSION_DEFAULT;
+	private boolean automaticReconnect = false;
+	private IMqttNetworkFactory networkFactory = new MqttMicroNetworkFactory();
+	static final MqttClientPersistence DEFAULT_FILE_PERSISTENCE = null;
+	private GprsConnectOptions gprsConnectOptions;
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the 
@@ -145,7 +165,7 @@ public class MqttConnectOptions {
 		if ((dest == null) || (payload == null)) {
 			throw new IllegalArgumentException();
 		}
-		MqttAsyncClient.validateTopic(dest);
+		MqttTopic.validate(dest, false/*wildcards NOT allowed*/);
 	}
 
 	/**
@@ -170,6 +190,15 @@ public class MqttConnectOptions {
 	}
 
 	/**
+	 * Returns the MQTT version.
+	 * @see #setMqttVersion(int)
+	 * @return the MQTT version.
+	 */
+	public int getMqttVersion() {
+		return MqttVersion;
+	}
+
+	/**
 	 * Sets the "keep alive" interval.
 	 * This value, measured in seconds, defines the maximum time interval 
 	 * between messages sent or received. It enables the client to 
@@ -191,6 +220,29 @@ public class MqttConnectOptions {
 		this.keepAliveInterval = keepAliveInterval;
 	}
 	
+	/**
+     * Returns the "max inflight".
+     * The max inflight limits to how many messages we can send without receiving acknowledgments. 
+     * @see #setMaxInflight(int)
+     * @return the max inflight
+     */
+    public int getMaxInflight() {
+        return maxInflight;
+    }
+
+    /**
+     * Sets the "max inflight". 
+     * please increase this value in a high traffic environment.
+     * <p>The default value is 10</p>
+     * @param maxInflight
+     */
+    public void setMaxInflight(int maxInflight) {
+        if (maxInflight < 0) {
+            throw new IllegalArgumentException();
+        }
+        this.maxInflight = maxInflight;
+    }
+
 	/**
 	 * Returns the connection timeout value.
 	 * @see #setConnectionTimeout(int)
@@ -389,8 +441,65 @@ public class MqttConnectOptions {
 		}
 	}
 	
+	public IMqttNetworkFactory getNetworkFactory() {
+		return networkFactory;
+	}
+
+	/**
+	 * Sets the MQTT version.
+	 * The default action is to connect with version 3.1.1, 
+	 * and to fall back to 3.1 if that fails.
+	 * Version 3.1.1 or 3.1 can be selected specifically, with no fall back,
+	 * by using the MQTT_VERSION_3_1_1 or MQTT_VERSION_3_1 options respectively.
+	 *
+	 * @param MqttVersion the version of the MQTT protocol.
+	 */
+	public void setMqttVersion(int MqttVersion)throws IllegalArgumentException {
+		if (MqttVersion != MQTT_VERSION_DEFAULT && 
+			MqttVersion != MQTT_VERSION_3_1 && 
+			MqttVersion != MQTT_VERSION_3_1_1) {
+			throw new IllegalArgumentException();
+		}
+		this.MqttVersion = MqttVersion;
+	}
+
+	/**
+	 * Returns whether the client will automatically attempt to reconnect to the
+	 * server if the connection is lost
+	 * @return the automatic reconnection flag.
+	 */
+	public boolean isAutomaticReconnect() {
+		return automaticReconnect;
+	}
+
+	/**
+	 * Sets whether the client will automatically attempt to reconnect to the
+	 * server if the connection is lost.
+	 * <ul>
+	 * <li>If set to false, the client will not attempt to automatically
+	 *  reconnect to the server in the event that the connection is lost.</li>
+	 *  <li>If set to true, in the event that the connection is lost, the client
+	 *  will attempt to reconnect to the server. It will initially wait 1 second before
+	 *  it attempts to reconnect, for every failed reconnect attempt, the delay will double
+	 *  until it is at 2 minutes at which point the delay will stay at 2 minutes.</li>
+	 * </ul>
+	 * @param automaticReconnect
+	 */
+	public void setAutomaticReconnect(boolean automaticReconnect) {
+		this.automaticReconnect = automaticReconnect;
+	}
+
+	public void setGprsConnectOptions(GprsConnectOptions gprsConnectOptions) {
+		this.gprsConnectOptions = gprsConnectOptions;
+	}
+
+	public GprsConnectOptions getGprsConnectOptions() {
+		return gprsConnectOptions;
+	}
+
 	public Hashtable getDebug() {
 		Hashtable hash = new Hashtable();
+		hash.put("MqttVersion", new Integer(getMqttVersion()));
 		hash.put("CleanSession", new Boolean(isCleanSession()));
 		hash.put("ConTimeout", new Integer(getConnectionTimeout()));
 		hash.put("KeepAliveInterval", new Integer(getKeepAliveInterval()));
@@ -401,6 +510,9 @@ public class MqttConnectOptions {
 		//} else {
 		//	hash.put("SocketFactory", getSocketFactory());
 		//}
+		if (gprsConnectOptions != null) {
+			hash.put("GprsConnectOptions", gprsConnectOptions.toString());
+		}
 		if (getSSLProperties()==null) {
 			hash.put("SSLProperties", "null");
 		} else {

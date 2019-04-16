@@ -23,10 +23,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 /**
  * Provides a mechanism for creating a NetworkModule
  */
-public class MqttMicroNetworkFactory implements IMqttNetworkFactory {
-	
-	final static String className = MqttMicroNetworkFactory.class.getName();
-	public static Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
+public class MqttMicroNetworkFactory extends AbstractMqttNetworkFactory {
 	
 	private static final int URI_TYPE_TCP = 0;
 	private static final int URI_TYPE_SSL = 1;
@@ -40,10 +37,10 @@ public class MqttMicroNetworkFactory implements IMqttNetworkFactory {
 	 * @param Connect options 
 	 * @return a network module appropriate to the specified address.
 	 */
-	public NetworkModule createNetworkModule(String address, MqttConnectOptions options, String clientid) throws MqttException {
+	public NetworkModule createNetworkModule(String address, MqttConnectOptions options, String clientId) throws MqttException {
 		final String methodName = "createNetworkModule";
 		// @TRACE 115=URI={0}
-		log.fine(className, methodName, "115", new Object[] { address });
+		log.fine(CLASS_NAME, methodName, "115", new Object[] { address });
 
 		NetworkModule netModule;
 		String shortAddress;
@@ -57,7 +54,7 @@ public class MqttMicroNetworkFactory implements IMqttNetworkFactory {
 			shortAddress = address.substring(6);
 			host = getHostName(shortAddress);
 			port = getPort(shortAddress, 1883);
-			netModule = new TCPMicroNetworkModule(host, port);
+			netModule = new TCPMicroNetworkModule(host, port, options.getGprsConnectOptions());
 			break;
 		case URI_TYPE_SSL:
 			shortAddress = address.substring(6);
@@ -65,7 +62,7 @@ public class MqttMicroNetworkFactory implements IMqttNetworkFactory {
 			port = getPort(shortAddress, 8883);
 			// SSL configuration for Java ME is much simpler, and we'll use
 			// the platform settings.
-			netModule = new SSLMicroNetworkModule(host, port);
+			netModule = new SSLMicroNetworkModule(host, port, options.getGprsConnectOptions());
 			break;
 		default:
 			// This shouldn't happen, as long as validateURI() has been called.
@@ -74,40 +71,6 @@ public class MqttMicroNetworkFactory implements IMqttNetworkFactory {
 		return netModule;
 	}
 
-	/**
-	 * Method to retrieve the port from the URI or the default
-	 * port if the URI does not contain a port
-	 *
-	 * @param address the URI for the server.
-	 * @param default port 
-	 * @return the port number
-	 */
-	public int getPort(String uri, int defaultPort) {
-		int port;
-		int portIndex = uri.lastIndexOf(':');
-		if (portIndex == -1) {
-			port = defaultPort;
-		} else {
-			port = Integer.valueOf(uri.substring(portIndex + 1)).intValue();
-		}
-		return port;
-	}
-
-	/**
-	 * Method to retrieve the host name from the URI
-	 * 
-	 * @param address the URI for the server.
-	 * @return the host name
-	 */
-	public String getHostName(String uri) {
-		int schemeIndex = uri.lastIndexOf('/');
-		int portIndex = uri.lastIndexOf(':');
-		if (portIndex == -1) {
-			portIndex = uri.length();
-		}
-		return uri.substring(schemeIndex + 1, portIndex);
-	}
-	
 	/**
 	 * Validate a URI 
 	 * @param srvURI

@@ -15,7 +15,6 @@
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -34,11 +33,11 @@ public class MqttOutputStream extends OutputStream {
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private ClientState clientState = null;
-	private BufferedOutputStream out;
+	private OutputStream out;
 	
 	public MqttOutputStream(ClientState clientState, OutputStream out) {
 		this.clientState = clientState;
-		this.out = new BufferedOutputStream(out);
+		this.out = BufferedOutputStreamFactory.wrap(out);
 	}
 	
 	public void close() throws IOException {

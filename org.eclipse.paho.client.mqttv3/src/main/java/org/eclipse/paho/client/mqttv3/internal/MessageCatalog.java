@@ -31,12 +31,15 @@ public abstract class MessageCatalog {
 				} catch (Exception e) {
 					return "";
 				}
-			} else if (ExceptionHelper.isClassAvailable("org.eclipse.paho.client.mqttv3.internal.MIDPCatalog")){
+			} else if (ExceptionHelper.isClassAvailable("org.eclipse.paho.client.mqttv3.internal.MicroCatalog")){
 				try {
-					INSTANCE = (MessageCatalog)Class.forName("org.eclipse.paho.client.mqttv3.internal.MIDPCatalog").newInstance();
+					INSTANCE = (MessageCatalog)Class.forName("org.eclipse.paho.client.mqttv3.internal.MicroCatalog").newInstance();
 				} catch (Exception e) {
 					return "";
 				}
+			}
+			else {
+				throw new IllegalStateException("Could not load MessageCatalog implementation!");
 			}
 		}
 		return INSTANCE.getLocalizedMessage(id);

@@ -22,13 +22,16 @@ import javax.microedition.io.SocketConnection;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+import org.eclipse.paho.client.mqttv3.util.GprsConnectOptions;
 
 
 /**
  * A network module for connecting over TCP from Java ME (CLDC profile).
  */
 public class TCPMicroNetworkModule implements NetworkModule {
-	private String uri;
+	private final String host;
+	private final int port;
+	private final String uri;
 	private SocketConnection connection;
 	private InputStream in;
 	private OutputStream out;
@@ -43,8 +46,10 @@ public class TCPMicroNetworkModule implements NetworkModule {
 	 * @param port the port to connect to
 	 * @param secure whether or not to use SSL.
 	 */
-	public TCPMicroNetworkModule(String host, int port) {
-		this.uri = "socket://" + host + ":" + port;
+	public TCPMicroNetworkModule(String host, int port, GprsConnectOptions options) {
+		this.host = host;
+		this.port = port;
+		this.uri = "socket://" + host + ":" + port + GprsConnectOptions.toUriParameters(options);
 	}
 	
 	/**
@@ -82,4 +87,9 @@ public class TCPMicroNetworkModule implements NetworkModule {
 		out.close();
 		connection.close();
 	}
+
+	public String getServerURI() {
+		return "tcp://" + host + ":" + port;
+	}
+
 }

@@ -16,7 +16,7 @@
 package org.eclipse.paho.client.mqttv3.util;
 
 import java.util.Enumeration;
-import java.util.Properties;
+import java.util.Hashtable;
 
 import org.eclipse.paho.client.mqttv3.internal.ClientComms;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
@@ -36,7 +36,7 @@ public class Debug {
 	private static final String CLASS_NAME = ClientComms.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 	private static final String separator = "==============";
-	private static final String lineSep = System.getProperty("line.separator","\n");
+	private static final String lineSep = "\n";
 	
 	private String clientID;
 	private ClientComms comms;
@@ -101,15 +101,13 @@ public class Debug {
 	 */
 	public void dumpSystemProperties() {
 		
-	    Properties sysProps = System.getProperties();
-    	log.fine(CLASS_NAME,"dumpSystemProperties", dumpProperties(sysProps, "SystemProperties").toString());
 	}
 
 	/**
 	 * Dump interesting variables from ClientState
 	 */
 	public void dumpClientState() {
-		Properties props = null;
+		Hashtable props = null;
 	    if (comms != null && comms.getClientState() != null ) {
 	    	props = comms.getClientState().getDebug();
 	    	log.fine(CLASS_NAME,"dumpClientState", dumpProperties(props, clientID + " : ClientState").toString());
@@ -120,7 +118,7 @@ public class Debug {
 	 * Dump interesting variables from ClientComms
 	 */
 	public void dumpClientComms() {
-		Properties props = null;
+		Hashtable props = null;
 	    if (comms != null) {
 	    	props = comms.getDebug();
 	    	log.fine(CLASS_NAME,"dumpClientComms", dumpProperties(props, clientID + " : ClientComms").toString());
@@ -131,7 +129,7 @@ public class Debug {
 	 * Dump Connection options
 	 */
 	public void dumpConOptions() {
-		Properties props = null;
+		Hashtable props = null;
 	    if (comms != null) {
 	    	props = comms.getConOptions().getDebug();
 	    	log.fine(CLASS_NAME,"dumpConOptions", dumpProperties(props, clientID + " : Connect Options").toString());
@@ -142,10 +140,10 @@ public class Debug {
 	/**
 	 * Return a set of properties as a formatted string
 	 */
-	public static String dumpProperties(Properties props, String name) {
+	public static String dumpProperties(Hashtable props, String name) {
 		
 		StringBuffer propStr = new StringBuffer();
-	    Enumeration propsE = props.propertyNames();
+	    Enumeration propsE = props.keys();
     	propStr.append(lineSep+separator+" "+name+" "+ separator+lineSep);
 	    while (propsE.hasMoreElements()) {
 	    	String key = (String)propsE.nextElement();

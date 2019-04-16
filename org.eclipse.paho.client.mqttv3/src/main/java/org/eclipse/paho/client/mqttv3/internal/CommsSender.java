@@ -79,7 +79,7 @@ public class CommsSender implements Runnable {
 							// first notify get routine to finish
 							clientState.notifyQueueLock();
 							// Wait for the thread to finish.
-							sendThread.join(100);
+							sendThread.join();
 						}
 					}
 					catch (InterruptedException ex) {

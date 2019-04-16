@@ -195,7 +195,8 @@ public class CommsTokenStore {
 			}
 	
 			MqttDeliveryToken[] result = new MqttDeliveryToken[list.size()];
-			return (MqttDeliveryToken[]) list.toArray(result);
+			list.copyInto(result);
+			return result;
 		}
 	}
 	
@@ -237,7 +238,7 @@ public class CommsTokenStore {
 		}
 	}
 	public String toString() {
-		String lineSep = System.getProperty("line.separator","\n");
+		String lineSep = "\n";
 		StringBuffer toks = new StringBuffer();
 		synchronized(tokens) {
 			Enumeration enumeration = tokens.elements();

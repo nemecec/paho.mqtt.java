@@ -20,7 +20,7 @@
 package org.eclipse.paho.client.mqttv3.internal;
 
 import java.util.Enumeration;
-import java.util.Properties;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import org.eclipse.paho.client.mqttv3.BufferedMessage;
@@ -595,8 +595,8 @@ public class ClientComms {
 		return conOptions;
 	}
 
-	public Properties getDebug() {
-		Properties props = new Properties();
+	public Hashtable getDebug() {
+		Hashtable props = new Hashtable();
 		props.put("conState", new Integer(conState));
 		props.put("serverURI", getClient().getServerURI());
 		props.put("callback", callback);

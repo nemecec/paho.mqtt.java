@@ -22,22 +22,13 @@
 package org.eclipse.paho.client.mqttv3;
 
 import java.util.Hashtable;
-import java.util.Properties;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 import org.eclipse.paho.client.mqttv3.internal.ClientComms;
 import org.eclipse.paho.client.mqttv3.internal.ConnectActionListener;
 import org.eclipse.paho.client.mqttv3.internal.DisconnectedMessageBuffer;
 import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
-import org.eclipse.paho.client.mqttv3.internal.LocalNetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
-import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
@@ -45,7 +36,6 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubscribe;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.client.mqttv3.util.Debug;
 
 /**
@@ -178,7 +168,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @throws MqttException if any other problem was encountered
 	 */
 	public MqttAsyncClient(String serverURI, String clientId) throws MqttException {
-		this(serverURI,clientId, new MqttDefaultFilePersistence());
+		this(serverURI,clientId, MqttConnectOptions.DEFAULT_FILE_PERSISTENCE);
 	}
 	
 	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
@@ -318,186 +308,6 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		return(ch >= MIN_HIGH_SURROGATE) && (ch <= MAX_HIGH_SURROGATE);
 	}
 
-	/**
-	 * Factory method to create an array of network modules, one for
-	 * each of the supplied URIs
-	 *
-	 * @param address the URI for the server.
-	 * @return a network module appropriate to the specified address.
-	 */
-
-	// may need an array of these network modules
-
-	protected NetworkModule[] createNetworkModules(String address, MqttConnectOptions options) throws MqttException, MqttSecurityException {
-		final String methodName = "createNetworkModules";
-		// @TRACE 116=URI={0}
-		log.fine(CLASS_NAME, methodName, "116", new Object[]{address});
-
-		NetworkModule[] networkModules = null;
-		String[] serverURIs = options.getServerURIs();
-		String[] array = null;
-		if (serverURIs == null) {
-			array = new String[]{address};
-		} else if (serverURIs.length == 0) {
-			array = new String[]{address};
-		} else {
-			array = serverURIs;
-		}
-
-		networkModules = new NetworkModule[array.length];
-		for (int i = 0; i < array.length; i++) {
-			networkModules[i] = createNetworkModule(array[i], options);
-		}
-
-		log.fine(CLASS_NAME, methodName, "108");
-		return networkModules;
-	}
-
-	/**
-	 * Factory method to create the correct network module, based on the
-	 * supplied address URI.
-	 *
-	 * @param address the URI for the server.
-	 * @param Connect options
-	 * @return a network module appropriate to the specified address.
-	 */
-	private NetworkModule createNetworkModule(String address, MqttConnectOptions options) throws MqttException, MqttSecurityException {
-		final String methodName = "createNetworkModule";
-		// @TRACE 115=URI={0}
-		log.fine(CLASS_NAME,methodName, "115", new Object[] {address});
-
-		NetworkModule netModule;
-		String shortAddress;
-		String host;
-		int port;
-		SocketFactory factory = options.getSocketFactory();
-
-		int serverURIType = MqttConnectOptions.validateURI(address);
-
-		switch (serverURIType) {
-		case MqttConnectOptions.URI_TYPE_TCP :
-			shortAddress = address.substring(6);
-			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 1883);
-			if (factory == null) {
-				factory = SocketFactory.getDefault();
-			}
-			else if (factory instanceof SSLSocketFactory) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
-			}
-			netModule = new TCPNetworkModule(factory, host, port, clientId);
-			((TCPNetworkModule)netModule).setConnectTimeout(options.getConnectionTimeout());
-			break;
-		case MqttConnectOptions.URI_TYPE_SSL:
-			shortAddress = address.substring(6);
-			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 8883);
-			SSLSocketFactoryFactory factoryFactory = null;
-			if (factory == null) {
-//				try {
-					factoryFactory = new SSLSocketFactoryFactory();
-					Properties sslClientProps = options.getSSLProperties();
-					if (null != sslClientProps)
-						factoryFactory.initialize(sslClientProps, null);
-					factory = factoryFactory.createSocketFactory(null);
-//				}
-//				catch (MqttDirectException ex) {
-//					throw ExceptionHelper.createMqttException(ex.getCause());
-//				}
-			}
-			else if ((factory instanceof SSLSocketFactory) == false) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
-			}
-
-			// Create the network module...
-			netModule = new SSLNetworkModule((SSLSocketFactory) factory, host, port, clientId);
-			((SSLNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
-			// Ciphers suites need to be set, if they are available
-			if (factoryFactory != null) {
-				String[] enabledCiphers = factoryFactory.getEnabledCipherSuites(null);
-				if (enabledCiphers != null) {
-					((SSLNetworkModule) netModule).setEnabledCiphers(enabledCiphers);
-				}
-			}
-			break;
-		case MqttConnectOptions.URI_TYPE_WS:
-			shortAddress = address.substring(5);
-			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 80);
-			if (factory == null) {
-				factory = SocketFactory.getDefault();
-			}
-			else if (factory instanceof SSLSocketFactory) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
-			}
-			netModule = new WebSocketNetworkModule(factory, address, host, port, clientId);
-			((WebSocketNetworkModule)netModule).setConnectTimeout(options.getConnectionTimeout());
-			break;
-		case MqttConnectOptions.URI_TYPE_WSS:
-			shortAddress = address.substring(6);
-			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 443);
-			SSLSocketFactoryFactory wSSFactoryFactory = null;
-			if (factory == null) {
-				wSSFactoryFactory = new SSLSocketFactoryFactory();
-					Properties sslClientProps = options.getSSLProperties();
-					if (null != sslClientProps)
-						wSSFactoryFactory.initialize(sslClientProps, null);
-					factory = wSSFactoryFactory.createSocketFactory(null);
-
-			}
-			else if ((factory instanceof SSLSocketFactory) == false) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
-			}
-
-			// Create the network module...	
-			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port, clientId);
-			((WebSocketSecureNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
-			// Ciphers suites need to be set, if they are available
-			if (wSSFactoryFactory != null) {
-				String[] enabledCiphers = wSSFactoryFactory.getEnabledCipherSuites(null);
-				if (enabledCiphers != null) {
-					((SSLNetworkModule) netModule).setEnabledCiphers(enabledCiphers);
-				}
-			}
-			break;
-		case MqttConnectOptions.URI_TYPE_LOCAL :
-			netModule = new LocalNetworkModule(address.substring(8));
-			break;
-		default:
-			// This shouldn't happen, as long as validateURI() has been called.
-			netModule = null;
-		}
-		return netModule;
-	}
-
-	private int getPort(String uri, int defaultPort) {
-		int port;
-		int portIndex = uri.lastIndexOf(':');
-		if (portIndex == -1) {
-			port = defaultPort;
-		}
-		else {
-			int slashIndex = uri.indexOf('/');
-			if (slashIndex == -1) {
-				slashIndex = uri.length();
-			}
-		    port = Integer.parseInt(uri.substring(portIndex + 1, slashIndex));
-		}
-		return port;
-	}
-
-	private String getHostName(String uri) {
-		int portIndex = uri.indexOf(':');
-		if (portIndex == -1) {
-			portIndex = uri.indexOf('/');
-		}
-		if (portIndex == -1) {
-			portIndex = uri.length();
-		}
-		return uri.substring(0, portIndex);
-	}
-
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#connect(java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
@@ -546,7 +356,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		// @TRACE 103=cleanSession={0} connectionTimeout={1} TimekeepAlive={2} userName={3} password={4} will={5} userContext={6} callback={7}
 		log.fine(CLASS_NAME,methodName, "103",
 				new Object[]{
-				Boolean.valueOf(options.isCleanSession()),
+				new Boolean(options.isCleanSession()),
 				new Integer(options.getConnectionTimeout()),
 				new Integer(options.getKeepAliveInterval()),
 				options.getUserName(),
@@ -554,7 +364,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 				((null == options.getWillMessage())?"[null]":"[notnull]"),
 				userContext,
 				callback });
-		comms.setNetworkModules(createNetworkModules(serverURI, options));
+		comms.setNetworkModules(options.getNetworkFactory().createNetworkModules(serverURI, options, clientId));
 		comms.setReconnectCallback(new MqttCallbackExtended() {
 			
 			public void messageArrived(String topic, MqttMessage message) throws Exception {
@@ -968,8 +778,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @see MqttConnectOptions#setCleanSession(boolean)
 	 */
 	public static String generateClientId() {
-		//length of nanoTime = 15, so total length = 19  < 65535(defined in spec) 
-		return CLIENT_ID_PREFIX + System.nanoTime();
+		//length of currentTimeMillis = 13, so total length = 17  < 65535(defined in spec)
+		return CLIENT_ID_PREFIX + System.currentTimeMillis() + new Random().nextInt(10000);
 	}
 
 	/* (non-Javadoc)
@@ -1109,7 +919,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		String methodName = "startReconnectCycle";
 		//@Trace 503=Start reconnect timer for client: {0}, delay: {1}
 		log.fine(CLASS_NAME, methodName, "503", new Object[]{this.clientId, new Long(reconnectDelay)});
-		reconnectTimer = new Timer("MQTT Reconnect: " + clientId);
+		reconnectTimer = new Timer();
 		reconnectTimer.schedule(new ReconnectTask(), reconnectDelay);
 	}
 	

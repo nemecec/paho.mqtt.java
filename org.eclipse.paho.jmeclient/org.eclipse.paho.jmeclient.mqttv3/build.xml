@@ -1,10 +1,11 @@
-<project name="org.eclipse.paho.jmeclient.mqttv3" default="full">
+<project name="org.eclipse.paho.jmeclient.mqttv3" default="full" xmlns:aether="antlib:org.eclipse.aether.ant">
 
 	<description>Builds a redistributable JAR and documentation for the Paho Java ME client.</description>
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
-    
-	<property name="property.file" value="antbuild.properties"/>
+
+	<property environment="env"/>
+	<property name="property.file" value="build.properties"/>
 	<property file="${property.file}"/>
 	
 	<property name="source.folder" value="./" />
@@ -28,7 +29,61 @@
 		<mkdir dir="${output.folder}/src" />
 		<mkdir dir="${output.folder}/bin" />
 	</target>
-	
+
+	<target name="init-aether" depends="init">
+		<!-- https://wiki.eclipse.org/Aether/Ant_Tasks -->
+
+		<mkdir dir="${source.folder}/antlib" />
+
+		<get src="http://search.maven.org/remotecontent?filepath=org/eclipse/aether/aether-ant-tasks/1.0.0.v20140518/aether-ant-tasks-1.0.0.v20140518-uber.jar"
+				 dest="antlib/aether-ant-tasks-uber.jar" verbose="true" skipexisting="true"/>
+		<fail message="Checksum mismatch for 'antlib/aether-ant-tasks-uber.jar'. Please delete it and rerun ant to redownload.">
+			<condition>
+				<not>
+					<checksum file="antlib/aether-ant-tasks-uber.jar" algorithm="SHA"
+										property="95dadd03392a75564904da45108cf048abe6e5bb" verifyproperty="checksum.matches"/>
+				</not>
+			</condition>
+		</fail>
+
+		<path id="aether-ant-tasks.classpath" path="antlib/aether-ant-tasks-uber.jar" />
+		<typedef classpathref="aether-ant-tasks.classpath"
+						 resource="org/eclipse/aether/ant/antlib.xml"
+						 uri="antlib:org.eclipse.aether.ant" />
+
+		<aether:settings file="${source.folder}/../../.circleci/.m2/settings.xml" />
+
+		<aether:remoterepo id="release.repo" url="${env.MAVEN_REPO_URL}/maven-releases">
+			<releases enabled="true" updates="daily" />
+			<snapshots enabled="false" />
+			<authentication refid="auth" />
+		</aether:remoterepo>
+
+		<aether:remoterepo id="snapshot.repo" url="${env.MAVEN_REPO_URL}/maven-snapshots">
+			<releases enabled="false" />
+			<snapshots enabled="true" />
+			<authentication refid="auth" />
+		</aether:remoterepo>
+
+		<aether:authentication id="auth" username="${env.MAVEN_REPO_USER}" password="${env.MAVEN_REPO_PASS}" />
+
+		<aether:pom id="pom" file="${source.folder}/../../org.eclipse.paho.client.mqttv3/pom.xml" />
+
+		<aether:artifacts id="attached">
+			<aether:artifact file="${ship.folder}/${paho-jmeclient-v3-jar}" />
+			<aether:artifact file="${ship.folder}/${paho-jmeclient-v3-source-jar}" type="jar" classifier="sources" />
+		</aether:artifacts>
+	</target>
+
+	<target name="resolve-dependencies" depends="init-aether" description="Resolves dependencies from Maven repository">
+		<aether:resolve>
+			<aether:dependencies pomRef="pom"/>
+			<path refid="cp.compile" classpath="compile"/>
+			<path refid="cp.test" classpath="test" />
+			<path refid="cp.runtime" classpath="runtime"/>
+		</aether:resolve>
+	</target>
+
 	<target name="updateManifest" description="Update manifest file.">
 		<manifest file="${folder}/META-INF/MANIFEST.MF" mode="update">
 			<attribute name="Bundle-Version" value="${bundleVersion}" />
@@ -47,46 +102,43 @@
 		</if> -->
 	</target>
 
-	<target name="compile" depends="init" description="Compile Java classes.">
+	<target name="compile" depends="resolve-dependencies" description="Compile Java classes.">
 		<echo>Compiling client library...</echo>
 		<copy overwrite="true" todir="${output.folder}/src">
-			<fileset dir="${source.folder}/../../org.eclipse.paho.client.mqttv3/src/main" >
+			<fileset dir="${source.folder}/../../org.eclipse.paho.client.mqttv3/src/main/java" >
 				<exclude name="**/FileLock.java" />
 				<exclude name="**/LocalNetworkModule.java" />
 				<exclude name="**/MqttNetworkFactory.java" />
 				<exclude name="**/ResourceBundleCatalog.java" />
 				<exclude name="**/security/*" />
 				<exclude name="**/SSLNetworkModule.java" />
-				<exclude name="**/TCPNetworkModile.java" />
+				<exclude name="**/TCPNetworkModule.java" />
 				<exclude name="**/logging/*" />
 				<exclude name="**/MqttConnectOptions.java" />
 				<exclude name="**/MqttDefaultFilePersistence.java" />
+				<exclude name="**/websocket/*" />
+				<exclude name="**/MqttPropertiesImpl.java" />
 			</fileset>
+			<fileset dir="${source.folder}/../../org.eclipse.paho.client.mqttv3/src/main/java-templates" />
 			<fileset dir="${source.folder}/src" />
 		</copy>
-		
-		<path id="lib.path.ref">
-			<fileset dir="c:/Java_ME_platform_SDK_3.2/lib">
-				<include name="**/cldc_1.1.jar" />
-				<include name="**/jsr75_1.0.jar" />
-				<include name="**/jsr120_1.1.jar" />
-				<include name="**/jsr172_1.0.jar" />
-				<include name="**/jsr177_1.0.jar" />
-				<include name="**/jsr179_1.0.jar" />
-				<include name="**/jsr280_1.0.jar" />
-				<include name="**/impng_1.0.jar" />
-			</fileset>
-		</path>
-		
-		
+
+                 <replace file="${output.folder}/src/org/eclipse/paho/client/mqttv3/internal/ClientComms.java"
+                        token="@@BUILDLEVEL@@"
+                        value="${build.level}"/>
+                <replace file="${output.folder}/src/org/eclipse/paho/client/mqttv3/internal/ClientComms.java"
+                        token="@@VERSION@@"
+                        value="${client.release.version}"/>
+
 		<javac srcdir="${output.folder}/src" 
 		    destdir="${output.folder}/bin" 
 		    source="${javac_source}" 
 		    target="${javac_target}" 
 		    debug="${javac_debug}" 
 		    debuglevel="${javac_debuglevel}" 
-		    includeantruntime="false" >
-			<classpath refid="lib.path.ref"/>
+		    includeantruntime="false"
+		    bootclasspath=".">
+			<classpath refid="cp.compile"/>
 		</javac>
 		
 		<!-- Copy additional source file to the output tree -->
@@ -96,6 +148,9 @@
 			</fileset>
 			<fileset dir="${source.folder}/src">
 				<include name="**/*.properties" />
+			</fileset>
+			<fileset dir="${source.folder}/../../org.eclipse.paho.client.mqttv3/src/main/resources" >
+				<include name="**/*" />
 			</fileset>
 		</copy>
 
@@ -127,5 +182,16 @@
 
 	<target name="full" depends="clean,compile,package" 
 		description="Clean, build and package." />
+
+	<target name="install" depends="full" description="Install JAR to local Maven repository">
+		<aether:install pomref="pom" artifactsref="attached" />
+	</target>
+
+	<target name="deploy" depends="install" description="Deploy JAR to remote Maven repository">
+		<aether:deploy pomref="pom" artifactsref="attached">
+			<remoterepo refid="release.repo"/>
+			<snapshotrepo refid="snapshot.repo"/>
+		</aether:deploy>
+	</target>
 
 </project>

@@ -146,7 +146,7 @@ public class MqttTopic {
 		try {
 			topicLen = topicString.getBytes("UTF-8").length;
 		} catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException(e);
+			throw new IllegalStateException(e.toString());
 		}
 
 		// Spec: length check
@@ -155,8 +155,7 @@ public class MqttTopic {
 		// - Topic Names and Topic Filters are UTF-8 encoded strings, they MUST
 		// NOT encode to more than 65535 bytes
 		if (topicLen < MIN_TOPIC_LEN || topicLen > MAX_TOPIC_LEN) {
-			throw new IllegalArgumentException(String.format("Invalid topic length, should be in range[%d, %d]!",
-					new Object[] { new Integer(MIN_TOPIC_LEN), new Integer(MAX_TOPIC_LEN) }));
+			throw new IllegalArgumentException("Invalid topic length, should be in range[" + MIN_TOPIC_LEN + ", " + MAX_TOPIC_LEN + "]!");
 		}
 
 		// *******************************************************************************
@@ -177,7 +176,7 @@ public class MqttTopic {
 			// - The multi-level wildcard must be the last character used within
 			// the topic tree
 			if (Strings.countMatches(topicString, MULTI_LEVEL_WILDCARD) > 1
-					|| (topicString.contains(MULTI_LEVEL_WILDCARD) && !topicString
+					|| (topicString.indexOf(MULTI_LEVEL_WILDCARD) > -1 && !topicString
 							.endsWith(MULTI_LEVEL_WILDCARD_PATTERN))) {
 				throw new IllegalArgumentException(
 						"Invalid usage of multi-level wildcard in topic string: "
@@ -219,9 +218,8 @@ public class MqttTopic {
             if (chars[i] == singleLevelWildcardChar) {
                 // prev and next can be only '/' or none
                 if (prev != topicLevelSeparatorChar && prev != NUL || next != topicLevelSeparatorChar && next != NUL) {
-                    throw new IllegalArgumentException(String.format(
-                            "Invalid usage of single-level wildcard in topic string '%s'!",
-                            new Object[] { topicString }));
+                    throw new IllegalArgumentException(
+                            "Invalid usage of single-level wildcard in topic string '" + topicString + "'!");
                 }
             }
         }

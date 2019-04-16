@@ -163,6 +163,8 @@ public class MqttException extends Exception {
 	 */
 	public static final short REASON_CODE_DISCONNECTED_BUFFER_FULL	= 32203;
 
+	public static final short REASON_CODE_CATALOG_NOT_FOUND	= 32204;
+
 	private int reasonCode;
 	private Throwable cause;
 	
@@ -172,7 +174,7 @@ public class MqttException extends Exception {
 	 * @param reasonCode the reason code for the exception.
 	 */
 	public MqttException(int reasonCode) {
-		super();
+		super(MessageCatalog.getMessage(reasonCode));
 		this.reasonCode = reasonCode;
 	}
 	
@@ -182,7 +184,7 @@ public class MqttException extends Exception {
 	 * @param cause the underlying cause of the exception.
 	 */
 	public MqttException(Throwable cause) {
-		super();
+		super(String.valueOf(cause));
 		this.reasonCode = REASON_CODE_CLIENT_EXCEPTION;
 		this.cause = cause;
 	}
@@ -194,7 +196,7 @@ public class MqttException extends Exception {
 	 * @param cause the underlying cause of the exception.
 	 */
 	public MqttException(int reason, Throwable cause) {
-		super();
+		super(MessageCatalog.getMessage(reason) + ": " + cause);
 		this.reasonCode = reason;
 		this.cause = cause;
 	}

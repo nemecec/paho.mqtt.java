@@ -82,8 +82,8 @@ public class CommsCallback implements Runnable {
 			if (!running) {
 				// Preparatory work before starting the background thread.
 				// For safety ensure any old events are cleared.
-				messageQueue.clear();
-				completeQueue.clear();
+				messageQueue.removeAllElements();
+				completeQueue.removeAllElements();
 
 				running = true;
 				quiescing = false;
