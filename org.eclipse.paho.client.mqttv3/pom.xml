@@ -15,21 +15,25 @@
 			<groupId>com.cinterion</groupId>
 			<artifactId>cldc</artifactId>
 			<version>1.1</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.cinterion</groupId>
 			<artifactId>cwm</artifactId>
 			<version>1.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.cinterion</groupId>
 			<artifactId>impng</artifactId>
 			<version>1.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.cinterion</groupId>
 			<artifactId>jsr75</artifactId>
 			<version>1.0</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	
