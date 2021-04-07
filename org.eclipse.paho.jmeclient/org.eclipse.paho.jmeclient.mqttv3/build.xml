@@ -30,7 +30,7 @@
 		<mkdir dir="${output.folder}/bin" />
 	</target>
 
-	<target name="init-aether" depends="init">
+	<target name="download-aether" depends="init">
 		<!-- https://wiki.eclipse.org/Aether/Ant_Tasks -->
 
 		<mkdir dir="${source.folder}/antlib" />
@@ -45,7 +45,9 @@
 				</not>
 			</condition>
 		</fail>
+	</target>
 
+	<target name="init-aether" depends="download-aether">
 		<path id="aether-ant-tasks.classpath" path="antlib/aether-ant-tasks-uber.jar" />
 		<typedef classpathref="aether-ant-tasks.classpath"
 						 resource="org/eclipse/aether/ant/antlib.xml"
