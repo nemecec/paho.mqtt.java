@@ -49,7 +49,7 @@
 
 	<target name="init-aether" depends="download-aether">
 		<path id="aether-ant-tasks.classpath" path="antlib/aether-ant-tasks-uber.jar" />
-		<typedef classpathref="aether-ant-tasks.classpath"
+		<typedef classpathref="aether-ant-tasks.classpath" loaderref="aether-ant-tasks.loader"
 						 resource="org/eclipse/aether/ant/antlib.xml"
 						 uri="antlib:org.eclipse.aether.ant" />
 
