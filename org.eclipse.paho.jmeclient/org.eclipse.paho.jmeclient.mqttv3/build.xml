@@ -1,4 +1,4 @@
-<project name="org.eclipse.paho.jmeclient.mqttv3" default="full" xmlns:aether="antlib:org.eclipse.aether.ant">
+<project name="org.eclipse.paho.jmeclient.mqttv3" default="full" xmlns:aether="antlib:org.eclipse.aether.ant" xmlns:unless="ant:unless">
 
 	<description>Builds a redistributable JAR and documentation for the Paho Java ME client.</description>
 
@@ -36,15 +36,11 @@
 		<mkdir dir="${source.folder}/antlib" />
 
 		<get src="http://search.maven.org/remotecontent?filepath=org/eclipse/aether/aether-ant-tasks/1.0.1.v20141111/aether-ant-tasks-1.0.1.v20141111-uber.jar"
-				 dest="antlib/aether-ant-tasks-uber.jar" verbose="true" skipexisting="true"/>
-		<fail message="Checksum mismatch for 'antlib/aether-ant-tasks-uber.jar'. Please delete it and rerun ant to redownload.">
-			<condition>
-				<not>
-					<checksum file="antlib/aether-ant-tasks-uber.jar" algorithm="SHA"
-										property="9ff596e7b68b77a5cbd9e112f1835329a939d828" verifyproperty="checksum.matches"/>
-				</not>
-			</condition>
-		</fail>
+				dest="antlib/aether-ant-tasks-uber.jar" verbose="true" skipexisting="true"/>
+		<checksum file="antlib/aether-ant-tasks-uber.jar" algorithm="SHA"
+				property="9ff596e7b68b77a5cbd9e112f1835329a939d828" verifyproperty="checksum.matches"/>
+		<delete file="antlib/aether-ant-tasks-uber.jar" unless:true="${checksum.matches}"/>
+		<fail message="Checksum mismatch for 'antlib/aether-ant-tasks-uber.jar'. Please rerun Ant to download again." unless:true="${checksum.matches}"/>
 	</target>
 
 	<target name="init-aether" depends="download-aether">
