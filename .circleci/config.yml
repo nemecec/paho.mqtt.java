@@ -12,7 +12,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - dependencies-{{ checksum "pom.xml" }}
+            - dependencies-{{ checksum "pom.xml" }}-{{ checksum "org.eclipse.paho.jmeclient/org.eclipse.paho.jmeclient.mqttv3/antlib/aether-ant-tasks-uber.jar" }}
             # Fallback to using the latest cache if no exact match is found
             - dependencies-
       - run:
@@ -25,7 +25,7 @@ jobs:
           paths:
             - ~/.m2
             - ~/workdir/org.eclipse.paho.jmeclient/org.eclipse.paho.jmeclient.mqttv3/antlib
-          key: dependencies-{{ checksum "pom.xml" }}
+          key: dependencies-{{ checksum "pom.xml" }}-{{ checksum "org.eclipse.paho.jmeclient/org.eclipse.paho.jmeclient.mqttv3/antlib/aether-ant-tasks-uber.jar" }}
       - persist_to_workspace:
           root: ~/workdir
           paths:
@@ -40,7 +40,7 @@ jobs:
           at: .
       - restore_cache:
           keys:
-            - dependencies-{{ checksum "pom.xml" }}
+            - dependencies-{{ checksum "pom.xml" }}-{{ checksum "org.eclipse.paho.jmeclient/org.eclipse.paho.jmeclient.mqttv3/antlib/aether-ant-tasks-uber.jar" }}
             # Fallback to using the latest cache if no exact match is found
             - dependencies-
       - run:
@@ -67,7 +67,7 @@ jobs:
           at: .
       - restore_cache:
           keys:
-            - dependencies-{{ checksum "pom.xml" }}
+            - dependencies-{{ checksum "pom.xml" }}-{{ checksum "org.eclipse.paho.jmeclient/org.eclipse.paho.jmeclient.mqttv3/antlib/aether-ant-tasks-uber.jar" }}
             # Fallback to using the latest cache if no exact match is found
             - dependencies-
       - add_ssh_keys:
