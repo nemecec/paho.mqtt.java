@@ -36,4 +36,4 @@ if [ $ANT_EXIT_CODE -ne 0 ]; then
   exit $ANT_EXIT_CODE
 fi
 
-mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -DprocessAllModules -DgenerateBackupPoms=false
+mvn versions:commit versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -DprocessAllModules -DgenerateBackupPoms=false
