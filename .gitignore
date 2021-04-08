@@ -1,3 +1,5 @@
+release-settings.sh
+
 ### /.gitignore-boilerplates/Global/Eclipse.gitignore
 *.pydevproject
 .metadata

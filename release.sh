@@ -1,9 +1,14 @@
 #!/bin/bash
 
-# Fix username and password before running this script
-export MAVEN_REPO_USER=circleCI
-export MAVEN_REPO_PASS=FIXME
 export MAVEN_REPO_URL=https://extranet.sympower.net/nexus/repository
+RELEASE_SETTINGS_FILE="release-settings.sh"
+
+if [ -f "$RELEASE_SETTINGS_FILE" ]; then
+  source "$RELEASE_SETTINGS_FILE"
+else
+  echo "$RELEASE_SETTINGS_FILE missing! Use release-settings-sample.sh as a sample."
+  exit 1
+fi
 
 RELEASE_VERSION=$1
 NEXT_DEVELOPMENT_VERSION=$2
